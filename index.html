@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXORA X AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+background:#030712;
+overflow:hidden;
+color:white;
+height:100vh;
+cursor:none;
+}
+
+/* MATRIX */
+canvas{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:-5;
+opacity:0.15;
+}
+
+/* CURSOR */
+.cursor{
+position:fixed;
+width:20px;
+height:20px;
+border:2px solid cyan;
+border-radius:50%;
+pointer-events:none;
+transform:translate(-50%,-50%);
+z-index:999999;
+box-shadow:
+0 0 15px cyan,
+0 0 30px cyan;
+}
+
+/* GLOW */
+.glow{
+position:absolute;
+border-radius:50%;
+filter:blur(100px);
+animation:float 8s infinite alternate;
+}
+.glow1{
+width:400px;
+height:400px;
+background:#00ffff33;
+top:-100px;
+left:-100px;
+}
+.glow2{
+width:400px;
+height:400px;
+background:#ff00ff33;
+bottom:-100px;
+right:-100px;
+}
+@keyframes float{
+100%{
+transform:translateY(60px) translateX(40px);
+}
+}
+
+/* MAIN */
+.main{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:20px;
+position:relative;
+z-index:2;
+}
+.box{
+max-width:900px;
+padding:50px;
+border-radius:30px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:
+0 0 30px rgba(0,255,255,0.2),
+0 0 80px rgba(255,0,255,0.1);
+}
+
+/* TITLE */
+h1{
+font-size:90px;
+line-height:1;
+margin-bottom:20px;
+background:linear-gradient(90deg,#00ffff,#ff00ff,#00ffff);
+background-size:300%;
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+animation:gradient 5s linear infinite;
+}
+@keyframes gradient{
+100%{
+background-position:300%;
+}
+}
+p{
+font-size:20px;
+line-height:1.8;
+color:#d4d4d4;
+margin-bottom:30px;
+}
+.typing{
+height:35px;
+font-size:22px;
+color:#00ffff;
+margin-bottom:25px;
+}
+
+/* BUTTON */
+button{
+padding:18px 40px;
+border:none;
+border-radius:50px;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+background:linear-gradient(45deg,#00ffff,#ff00ff);
+color:white;
+transition:0.4s;
+box-shadow:0 0 20px cyan;
+}
+button:hover{
+transform:scale(1.08);
+box-shadow:
+0 0 30px cyan,
+0 0 60px #ff00ff;
+}
+
+/* AI CORE */
+.ai-core{
+margin:40px auto 0;
+width:250px;
+height:250px;
+border-radius:50%;
+border:5px solid rgba(0,255,255,0.2);
+position:relative;
+animation:rotate 12s linear infinite;
+box-shadow:0 0 60px cyan;
+}
+.ai-core::before{
+content:'';
+position:absolute;
+inset:25px;
+border-radius:50%;
+border:3px dashed #ff00ff;
+animation:rotateReverse 10s linear infinite;
+}
+.ai-core::after{
+content:'AI';
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:60px;
+font-weight:bold;
+color:#00ffff;
+text-shadow:0 0 20px cyan;
+}
+@keyframes rotate{
+100%{
+transform:rotate(360deg);
+}
+}
+@keyframes rotateReverse{
+100%{
+transform:rotate(-360deg);
+}
+}
+
+/* ================= SYSTEM PANEL ================= */
+.system-panel{
+position:fixed;
+top:100px;
+right:20px;
+display:flex;
+flex-direction:column;
+gap:15px;
+z-index:999;
+}
+.panel-card{
+width:220px;
+padding:18px;
+border-radius:20px;
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 0 20px rgba(0,255,255,0.15);
+}
+.panel-card h3{
+font-size:15px;
+margin-bottom:8px;
+color:#00ffff;
+}
+.panel-card p{
+font-size:18px;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar{
+position:fixed;
+left:20px;
+top:50%;
+transform:translateY(-50%);
+display:flex;
+flex-direction:column;
+gap:18px;
+z-index:999;
+}
+.side-btn{
+width:65px;
+height:65px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:28px;
+border-radius:20px;
+cursor:pointer;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(20px);
+transition:0.4s;
+border:1px solid rgba(255,255,255,0.08);
+}
+.side-btn:hover{
+transform:scale(1.12);
+box-shadow:0 0 25px cyan;
+}
+
+/* ================= SEARCH ================= */
+.search-system{
+padding:100px 20px;
+text-align:center;
+}
+.search-system h2{
+font-size:45px;
+margin-bottom:30px;
+color:#00ffff;
+}
+.search-box{
+display:flex;
+justify-content:center;
+gap:15px;
+flex-wrap:wrap;
+}
+.search-box input{
+width:500px;
+max-width:90%;
+padding:18px;
+border:none;
+border-radius:15px;
+background:#081120;
+color:white;
+font-size:16px;
+}
+.search-box button{
+padding:18px 35px;
+border:none;
+border-radius:15px;
+cursor:pointer;
+font-weight:bold;
+background:linear-gradient(45deg,#00ffff,#ff00ff);
+color:white;
+}
+#searchResult{
+margin-top:30px;
+font-size:20px;
+color:#00ffff;
+}
+
+/* ================= MUSIC ================= */
+.music-player{
+padding:100px 20px;
+text-align:center;
+}
+.music-player h2{
+font-size:42px;
+margin-bottom:20px;
+color:#ff00ff;
+}
+.music-player button{
+margin:10px;
+padding:15px 30px;
+border:none;
+border-radius:14px;
+background:linear-gradient(45deg,#00ffff,#ff00ff);
+color:white;
+cursor:pointer;
+}
+
+/* ================= NOTIFY ================= */
+.notify{
+position:fixed;
+bottom:30px;
+right:30px;
+padding:18px 28px;
+background:rgba(0,255,255,0.1);
+border:1px solid cyan;
+border-radius:18px;
+backdrop-filter:blur(20px);
+box-shadow:0 0 20px cyan;
+z-index:99999;
+animation:fadeIn 1s;
+}
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(40px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px){
+h1{
+font-size:50px;
+}
+p{
+font-size:16px;
+}
+.typing{
+font-size:18px;
+}
+.box{
+padding:30px;
+}
+.system-panel{
+position:relative;
+top:0;
+right:0;
+padding:20px;
+flex-direction:row;
+flex-wrap:wrap;
+justify-content:center;
+}
+.panel-card{
+width:45%;
+}
+.sidebar{
+bottom:20px;
+top:auto;
+left:50%;
+transform:translateX(-50%);
+flex-direction:row;
+}
+}
+</style>
+</head>
+
+<body>
+
+<!-- Matrix Rain Background -->
+<canvas id="matrix"></canvas>
+
+<!-- Cyber Glow Cursor -->
+<div class="cursor" id="cursor"></div>
+
+<!-- Neon Glows -->
+<div class="glow glow1"></div>
+<div class="glow glow2"></div>
+
+<!-- Main Dashboard / Boot Section -->
+<div class="main">
+  <div class="box">
+    <h1>NEXORA X AI</h1>
+    <p>The Future AI Operating System With Cyberpunk Intelligence</p>
+    <div class="typing" id="typing"></div>
+    <button onclick="activateAI()">Activate AI</button>
+    <div class="ai-core"></div>
+  </div>
+</div>
+
+<!-- ================= NEXORA X PANEL ================= -->
+<div class="system-panel">
+  <div class="panel-card">
+    <h3>⚡ AI STATUS</h3>
+    <p id="aiStatus">ONLINE</p>
+  </div>
+  <div class="panel-card">
+    <h3>🕒 LIVE TIME</h3>
+    <p id="liveClock">00:00:00</p>
+  </div>
+  <div class="panel-card">
+    <h3>🌐 NETWORK</h3>
+    <p id="networkStatus">CONNECTED</p>
+  </div>
+  <div class="panel-card">
+    <h3>🔋 SYSTEM POWER</h3>
+    <p id="batteryLevel">100%</p>
+  </div>
+</div>
+
+<!-- ================= SIDEBAR ================= -->
+<div class="sidebar">
+  <div class="side-btn" onclick="openApp('AI Chat Opened')">🤖</div>
+  <div class="side-btn" onclick="openApp('AI Search Opened')">🔍</div>
+  <div class="side-btn" onclick="openApp('AI Terminal Opened')">💻</div>
+  <div class="side-btn" onclick="openApp('AI Music Opened')">🎵</div>
+  <div class="side-btn" onclick="openApp('AI Settings Opened')">⚙️</div>
+</div>
+
+<!-- ================= AI SEARCH ================= -->
+<section class="search-system">
+  <h2>NEXORA SEARCH ENGINE</h2>
+  <div class="search-box">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search futuristic data...">
+    <button onclick="runSearch()">
+      Search
+    </button>
+  </div>
+  <div id="searchResult"></div>
+</section>
+
+<!-- ================= MUSIC PLAYER ================= -->
+<section class="music-player">
+  <h2>🎵 AI MUSIC PLAYER</h2>
+  <p id="musicName">
+    Cyberpunk Theme
+  </p>
+  <button onclick="playMusic()">Play Music</button>
+  <button onclick="stopMusic()">Stop</button>
+  <audio id="music">
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
+  </audio>
+</section>
+
+<!-- ================= NOTIFICATION ================= -->
+<div id="notify" class="notify">
+  NEXORA X AI READY
+</div>
+
+<script>
+/* CURSOR */
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{
+  cursor.style.left=e.clientX+'px';
+  cursor.style.top=e.clientY+'px';
+});
+
+/* MATRIX */
+const canvas=document.getElementById('matrix');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+const letters='01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const chars=letters.split('');
+const fontSize=14;
+const columns=canvas.width/fontSize;
+const drops=[];
+for(let i=0;i<columns;i++){ drops[i]=1; }
+function drawMatrix(){
+  ctx.fillStyle='rgba(0,0,0,0.05)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#00ffff';
+  ctx.font=fontSize+'px monospace';
+  for(let i=0;i<drops.length;i++){
+    const text=chars[Math.floor(Math.random()*chars.length)];
+    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+    if(drops[i]*fontSize>canvas.height&&Math.random()>0.975){
+      drops[i]=0;
+    }
+    drops[i]++;
+  }
+}
+setInterval(drawMatrix,35);
+
+/* AI Boot */
+function activateAI(){
+  alert('NEXORA X AI Activated 🚀');
+  const speech=
+    new SpeechSynthesisUtterance(
+      'Welcome Vansh. NEXORA X AI Activated Successfully.'
+    );
+  speech.rate=1;
+  speech.pitch=1;
+  window.speechSynthesis.speak(speech);
+}
+
+/* TYPING */
+const texts=[
+  'Initializing Quantum AI...',
+  'Neural Network Connected...',
+  'Cyberpunk Systems Online...',
+  'Voice AI Activated...',
+  'NEXORA X Ready...'
+];
+let count=0;
+let index=0;
+let currentText='';
+let letter='';
+(function type(){
+  if(count===texts.length){
+    count=0;
+  }
+  currentText=texts[count];
+  letter=currentText.slice(0,++index);
+  document.getElementById('typing').textContent=letter;
+  if(letter.length===currentText.length){
+    count++;
+    index=0;
+  }
+  setTimeout(type,120);
+})();
+
+/* RESIZE */
+window.addEventListener('resize',()=>{
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+});
+
+/* ================= LIVE CLOCK ================= */
+function updateClock(){
+  const now = new Date();
+  document.getElementById('liveClock')
+    .innerText =
+    now.toLocaleTimeString();
+}
+setInterval(updateClock,1000);
+
+/* ================= SEARCH ================= */
+function runSearch(){
+  const input =
+    document.getElementById('searchInput').value;
+  const result =
+    document.getElementById('searchResult');
+  if(input.trim()===''){
+    result.innerText =
+      'Please enter futuristic search query';
+  }else{
+    result.innerText =
+      'NEXORA AI searched: ' + input;
+  }
+}
+
+/* ================= SIDEBAR ================= */
+function openApp(name){
+  showNotification(name);
+}
+
+/* ================= MUSIC ================= */
+const music =
+  document.getElementById('music');
+function playMusic(){
+  music.play();
+  showNotification('AI Music Started');
+}
+function stopMusic(){
+  music.pause();
+  showNotification('Music Stopped');
+}
+
+/* ================= NOTIFICATION ================= */
+function showNotification(text){
+  const notify =
+    document.getElementById('notify');
+  notify.innerText = text;
+  notify.style.display='block';
+  setTimeout(()=>{
+    notify.style.display='none';
+  },3000);
+}
+
+/* ================= BATTERY ================= */
+if (navigator.getBattery) {
+  navigator.getBattery().then(function(battery){
+    function updateBattery(){
+      document.getElementById('batteryLevel')
+        .innerText =
+        Math.floor(battery.level*100)+'%';
+    }
+    updateBattery();
+    battery.addEventListener(
+      'levelchange',
+      updateBattery
+    );
+  });
+} else {
+  document.getElementById('batteryLevel')
+    .innerText = 'N/A';
+}
+
+/* ================= NETWORK ================= */
+function updateNetwork(){
+  document.getElementById('networkStatus')
+    .innerText =
+    navigator.onLine
+    ? 'CONNECTED'
+    : 'OFFLINE';
+}
+window.addEventListener(
+  'online',
+  updateNetwork
+);
+window.addEventListener(
+  'offline',
+  updateNetwork
+);
+updateNetwork();
+
+/* ================= AUTO NOTIFY ================= */
+setTimeout(()=>{
+  showNotification(
+    'Quantum Neural Core Connected'
+  );
+},4000);
+</script>
+</body>
+</html>
